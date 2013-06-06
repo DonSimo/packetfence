@@ -98,7 +98,7 @@ my $source_id = $portalSession->getProfile->getSourceByType($source_type);
 $info{'unregdate'} = &pf::authentication::match($source_id, {username => $pid}, $Actions::SET_ACCESS_DURATION);
 
 if (defined $info{'unregdate'}) {
-    $info{'unregdate'} = POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time + normalize_time($info{'unregdate'})));
+    $info{'unregdate'} = access_duration($info{'unregdate'});
 }
 else {
     $info{'unregdate'} = &pf::authentication::match($source_id, {username => $pid}, $Actions::SET_UNREG_DATE);

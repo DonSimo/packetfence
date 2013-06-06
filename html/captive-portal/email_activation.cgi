@@ -76,7 +76,7 @@ if ($source_id && defined($cgi->url_param('code'))) {
             my $expiration = &pf::authentication::match($source_id, $auth_params, $Actions::SET_ACCESS_DURATION);
 
             if (defined $expiration) {
-                $expiration = POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time + normalize_time($expiration)));
+                $expiration = access_duration($expiration);
             }
             else {
                 $expiration = &pf::authentication::match($source_id, $auth_params, $Actions::SET_UNREG_DATE);
@@ -196,6 +196,20 @@ if ($source_id && defined($cgi->url_param('code'))) {
                 );
                 exit(0);
             }
+
+            # Setting access timeout and role (category) dynamically
+            $info{'unregdate'} = &pf::authentication::matchByType($email_type, {username => $pid}, $Actions::SET_ACCESS_DURATION);
+
+            if (defined $info{'unregdate'}) {
+                $info{'unregdate'} = access_duration($info{'unregdate'});
+            }
+            else {
+                $info{'unregdate'} = &pf::authentication::matchByType($email_type, {username => $pid}, $Actions::SET_UNREG_DATE);
+            }
+
+            $info{'category'} = &pf::authentication::matchByType($email_type, {username => $pid}, $Actions::SET_ROLE);
+
+            $logger->debug("Determined unregdate $info{'unregdate'} and category $info{'category'} for pid $pid");
 
             # register the node
             %info = %{$node_info};
