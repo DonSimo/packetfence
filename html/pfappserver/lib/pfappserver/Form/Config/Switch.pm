@@ -28,11 +28,11 @@ has 'placeholders' => ( is => 'ro' );
 ## Definition
 has_field 'id' =>
   (
-   type => 'IPAddress',
-   label => 'IP Address',
+   type => 'SwitchID',
+   label => 'IP Address/Mac Address',
    accept => ['default'],
    required => 1,
-   messages => { required => 'Please specify the IP address of the switch.' },
+   messages => { required => 'Please specify the IP address/Mac Address of the switch.' },
   );
 has_field 'type' =>
   (
@@ -179,34 +179,7 @@ has_block 'snmp' =>
 has_block 'advance' =>
   (
    tag => 'div',
-   render_list => [ qw(macSearchesMaxNb macSearchesSleepInterval) ],
-  );
-
-has_field macSearchesMaxNb =>
-  (
-   type => 'PosInteger',
-   label => 'Maximum MAC addresses',
-   default => 30,
-   tags => {
-       after_element => \&help,
-       help => 'Maximum number of MAC addresses retrived from a port'
-   },
-  );
-
-has_field macSearchesSleepInterval  =>
-  (
-   type => 'PosInteger',
-   label => 'Sleep interval',
-   default => 2,
-   tags => {
-       after_element => \&help,
-       help => 'Sleep interval between queries of MAC addresses'
-   },
-  );
-
-has_block definition =>
-  (
-   render_list => [ qw(type mode deauthMethod VoIPEnabled uplink_dynamic uplink controllerIp) ],
+   render_list => [ qw(id type mode deauthMethod uplink_dynamic uplink controllerIp controllerPort) ],
   );
 has_field 'SNMPVersion' =>
   (
@@ -387,6 +360,17 @@ has_field controllerIp =>
         help => 'Use instead this IP address for de-authentication requests. Normally used for WiFi only'
     },
   );
+
+has_field controllerPort =>
+  (
+    type => 'PosInteger',
+    label => 'Controller IP Address',
+    tags => {
+        after_element => \&help_list,
+        help => 'Only for Wi-fi , if the deauth request must be send to another device than the access point then set the ip of the controller'
+    },
+  );
+
 
 =head1 METHODS
 
