@@ -355,7 +355,7 @@ has_field controllerIp =>
     type => 'IPAddress',
     label => 'Controller IP Address',
     tags => {
-        after_element => \&help,
+        after_element => \&help_list,
         help => 'Use instead this IP address for de-authentication requests. Normally used for WiFi only'
     },
   );
