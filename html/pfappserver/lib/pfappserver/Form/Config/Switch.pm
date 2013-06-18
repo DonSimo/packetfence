@@ -178,6 +178,7 @@ has_block 'snmp' =>
 
 has_block 'advance' =>
   (
+<<<<<<< HEAD
    tag => 'div',
    render_list => [ qw(macSearchesMaxNb macSearchesSleepInterval) ],
   );
@@ -391,7 +392,7 @@ has_field controllerIp =>
 has_field controllerPort =>
   (
     type => 'PosInteger',
-    label => 'Controller IP Address',
+    label => 'Controller Port',
     tags => {
         after_element => \&help_list,
         help => 'Only for Wi-fi , if the deauth request must be send to another device than the access point then set the ip of the controller'
