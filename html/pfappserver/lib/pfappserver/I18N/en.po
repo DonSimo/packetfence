@@ -2069,6 +2069,10 @@ msgstr ""
 msgid "Should have to reauthenticate the node if vlan change"
 msgstr ""
 
+# conf/documentation.conf (services.pfdns)
+msgid "Should pfdns be managed by PacketFence?"
+msgstr ""
+
 # conf/documentation.conf (vlan.closelocationlogonstop)
 msgid ""
   "Should open locationlog entries be closed when pfsetvlan is"
