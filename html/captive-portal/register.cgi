@@ -48,48 +48,63 @@ if ( !valid_mac($mac) ) {
     exit(0);
 }
 
+# Show the terms & conditions if requested
 if (defined($cgi->url_param('mode')) && $cgi->url_param('mode') eq "aup") {
     $portalSession->stash->{'email'} = $portalSession->cgi->param("email");
     pf::web::generate_aup_standalone_page($portalSession);
     exit(0);
 }
 
-unless (defined($cgi->url_param('email')) || pf::web::util::is_email_valid($cgi->param('email'))) {
-    $portalSession->stash->{'email'} = $portalSession->cgi->param("email");
-    pf::web::generate_login_page($portalSession, 'Please enter a valid email address.');
-    exit(0);
-}
-
-$logger->info($portalSession->getClientIp() . " - " . $portalSession->getClientMac() . " on registration page");
-
 my %info;
+my $params;
 
-# Pull username
-$info{'pid'} = $portalSession->cgi->param("email");
+# The specified email address is used as the user ID
+$info{'pid'} = lc $portalSession->cgi->param("email");
 
 # Pull browser user-agent string
 $info{'user_agent'} = $cgi->user_agent;
 
+$logger->info($portalSession->getClientIp() . " - " . $mac . " on registration page (" . $info{'pid'} . ")");
+
 my ($form_return, $err) = pf::web::validate_form($portalSession);
 if ($form_return != 1) {
-    $logger->trace("form validation failed or first time for " . $portalSession->getClientMac());
+    $portalSession->stash->{'email'} = $portalSession->cgi->param("email");
     pf::web::generate_login_page($portalSession, $err);
     exit(0);
 }
 
-my $pid = $info{'pid'};
-my $params = { username => $pid };
+# Check if the email address matches an existing account
+my $sql_type = pf::Authentication::Source::SQLSource->meta->get_attribute('type')->default;
+my $source = pf::authentication::getAuthenticationSourceByType($sql_type);
+if (defined $source) {
+    my $username = $source->username_from_email($info{'pid'});
+    if (defined $username) {
+        $info{'pid'} = $params->{'username'} = $username;
 
-my $locationlog_entry = locationlog_view_open_mac($mac);
-if ($locationlog_entry) {
-    $params->{connection_type} = $locationlog_entry->{'connection_type'};
-    $params->{SSID} = $locationlog_entry->{'ssid'};
+        my $locationlog_entry = locationlog_view_open_mac($mac);
+        if ($locationlog_entry) {
+            $params->{connection_type} = $locationlog_entry->{'connection_type'};
+            $params->{SSID} = $locationlog_entry->{'ssid'};
+        }
+
+        my $unregdate = &pf::authentication::match($source->id, $params, $Actions::SET_ACCESS_DURATION);
+        if (defined $unregdate) {
+            $unregdate = POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time + normalize_time($unregdate)));
+        }
+        else {
+            $unregdate = &pf::authentication::match($source->id, $params, $Actions::SET_UNREG_DATE);
+        }
+        if (defined $unregdate) {
+            $logger->debug("Set unregdate to $unregdate for email " . $portalSession->cgi->param("email") . " (pid $username, MAC $mac)");
+            $info{'unregdate'} = $unregdate;
+        }
+    }
 }
 
-$logger->trace("Assign role 'default' for connection");
+$logger->trace("Assign role 'default' for MAC $mac");
 %info = (%info, (category => 'default'));
 
-pf::web::web_node_register($portalSession, $pid, %info);
+pf::web::web_node_register($portalSession, $info{'pid'}, %info);
 pf::web::end_portal_session($portalSession);
 
 =head1 AUTHOR
