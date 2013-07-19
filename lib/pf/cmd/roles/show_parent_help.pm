@@ -13,13 +13,11 @@ pf::cmd::roles::show_parent_help
 
 use strict;
 use warnings;
-use base qw(Exporter);
-
-our @EXPORT = qw(showHelp);
+use Role::Tiny;
 
 sub showHelp {
     my ($self) = @_;
-    $self->SUPER::showHelp(ref($self->{parentCmd}) || $self->{parentCmd});
+    $self->{parentCmd}->showHelp();
 }
 
 =head1 AUTHOR
