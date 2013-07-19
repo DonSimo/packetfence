@@ -64,7 +64,10 @@ $info{'pid'} = lc $portalSession->cgi->param("email");
 # Pull browser user-agent string
 $info{'user_agent'} = $cgi->user_agent;
 
-$logger->info($portalSession->getClientIp() . " - " . $mac . " on registration page (" . $info{'pid'} . ")");
+# Set default expiration to 30 days
+$info{'unregdate'} = POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time + normalize_time('30D')));
+
+$logger->debug($portalSession->getClientIp() . " - " . $mac . " on registration page (" . $info{'pid'} . ")");
 
 my ($form_return, $err) = pf::web::validate_form($portalSession);
 if ($form_return != 1) {
