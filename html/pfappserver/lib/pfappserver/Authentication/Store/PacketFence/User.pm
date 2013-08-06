@@ -52,7 +52,7 @@ sub check_password {
 }
 
 sub roles {
-  return ();
+  return (qw(ALL));
 }
 
 *for_session = \&id;
