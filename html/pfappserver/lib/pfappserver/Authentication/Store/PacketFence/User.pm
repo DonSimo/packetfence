@@ -39,21 +39,22 @@ sub supported_features {
 }
 
 sub check_password {
-  my ( $self, $password ) = @_;
+  my ($self, $password) = @_;
 
   my ($result, $message, $source_id) = &pf::authentication::authenticate($self->_user, $password);
 
   if ($result) {
       my $value = &pf::authentication::match($source_id, {username => $self->_user}, $Actions::SET_ACCESS_LEVEL);
       $self->_roles([split /\s*,\s*/,$value]) if defined $value;
-      return (defined $value && all{ $_ ne 'NONE'} @{$self->_roles} );
+      return (defined $value && all{ $_ ne 'NONE'} @{$self->_roles});
   }
 
   return $FALSE;
 }
 
 sub roles {
-  return (@{$_[0]->_roles});
+    my $self = shift;
+    return (@{$self->_roles});
 }
 
 *for_session = \&id;
